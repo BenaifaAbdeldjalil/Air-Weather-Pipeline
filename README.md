@@ -1,4 +1,4 @@
-<h1>🌤️ Air &amp; Weather Pipeline</h1>
+#  <h1>🌤️ Air &amp; Weather Pipeline</h1>
 
 <p>
   Pipeline de données local croisant les données de <strong>météo</strong> et de
@@ -217,10 +217,11 @@ TESTS         : pytest + dbt test
 │   ├── quality/            # Règles de qualité et profilage
 │   └── utils/              # Base de données, logging
 ├── tests/
-├── docs/                   # Architecture, dictionnaire, décisions
-└── dbt_project/            # Modèles dbt : staging, intermediate, marts
-</code></pre>
+├── docs/                   # architecture, dictionnaire, décisions
+└── dbt_project/            # modèles dbt (staging, intermediate, marts)
+```
 
+---
 
 ## 5. Sources de données
 
@@ -252,80 +253,375 @@ Les fichiers CSV et Excel ne sont **pas** versionnés. Téléchargez-les depuis 
 git clone <URL_DU_DEPOT>
 cd air-weather-pipeline
 
-# 2. Créer et activer l'environnement virtuel
+# 2. Créer et activer l’environnement virtuel
 python3 -m venv .venv
-source .venv/bin/activate            # Windows PowerShell : .venv\Scripts\Activate.ps1
+source .venv/bin/activate
+
+# Windows PowerShell :
+# .venv\Scripts\Activate.ps1
 
 # 3. Installer les dépendances
 pip install --upgrade pip
 pip install -r requirements-dev.txt
 
-# 4. Configurer l'environnement
-cp .env.example .env                 # puis éditer .env avec vos valeurs locales
-```
+# 4. Configurer l’environnement
+cp .env.example .env
 
-### Base de données
+# Éditer ensuite le fichier .env avec vos valeurs locales.
+</code></pre>
 
-```bash
-# Dans psql, en superutilisateur : TODO adapter à vos noms
-#   CREATE ROLE pipeline_user WITH LOGIN PASSWORD '<mot_de_passe_local>';
-#   CREATE DATABASE air_weather OWNER pipeline_user;
+<h3>Base de données</h3>
 
-# Création des schémas et tables (ordre important)
+<pre><code class="language-bash"># Dans psql, en superutilisateur :
+# TODO : adapter les noms à votre environnement local
+#
+# CREATE ROLE pipeline_user WITH LOGIN PASSWORD '&lt;mot_de_passe_local&gt;';
+# CREATE DATABASE air_weather OWNER pipeline_user;
+
+# Création des schémas et tables : respecter l’ordre
 psql -U pipeline_user -h localhost -d air_weather -f sql/ddl/001_create_schemas.sql
 psql -U pipeline_user -h localhost -d air_weather -f sql/ddl/002_create_raw_tables.sql
 psql -U pipeline_user -h localhost -d air_weather -f sql/ddl/003_create_staging_tables.sql
 psql -U pipeline_user -h localhost -d air_weather -f sql/ddl/004_create_ops_tables.sql
-```
+</code></pre>
 
-### Fichiers externes
+<h3>Fichiers externes</h3>
 
-Placez dans `data/external/` :
+<p>Placez les fichiers suivants dans <code>data/external/</code> :</p>
 
-- `TODO: nom du fichier CSV` (communes)
-- `TODO: nom du fichier Excel` (populations)
+<ul>
+  <li><code>TODO: nom du fichier CSV</code> — référentiel des communes</li>
+  <li><code>TODO: nom du fichier Excel</code> — populations</li>
+</ul>
 
-### Vérification
+<h3>Vérification</h3>
 
-```bash
-python -m src.utils.db               # doit confirmer la connexion
-pytest                               # les tests doivent passer
-```
+<pre><code class="language-bash">python -m src.utils.db
+pytest
+</code></pre>
 
-### Configuration (`.env`)
+<p>
+  La commande de connexion doit confirmer l’accès à PostgreSQL et les tests doivent passer.
+</p>
 
-Aucune valeur réelle n'est versionnée. Les variables attendues sont listées dans `.env.example` :
+<h3>Configuration : <code>.env</code></h3>
 
-| Variable | Description |
-|---|---|
-| `DB_HOST` | hôte PostgreSQL |
-| `DB_PORT` | port PostgreSQL |
-| `DB_NAME` | nom de la base |
-| `DB_USER` | utilisateur |
-| `DB_PASSWORD` | mot de passe (jamais versionné) |
-| `TODO` | autres variables ajoutées par votre configuration |
+<p>
+  Aucune valeur réelle ne doit être versionnée. Les variables attendues figurent dans
+  <code>.env.example</code>.
+</p>
 
----
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>DB_HOST</code></td>
+      <td>Hôte PostgreSQL</td>
+    </tr>
+    <tr>
+      <td><code>DB_PORT</code></td>
+      <td>Port PostgreSQL</td>
+    </tr>
+    <tr>
+      <td><code>DB_NAME</code></td>
+      <td>Nom de la base de données</td>
+    </tr>
+    <tr>
+      <td><code>DB_USER</code></td>
+      <td>Utilisateur PostgreSQL</td>
+    </tr>
+    <tr>
+      <td><code>DB_PASSWORD</code></td>
+      <td>Mot de passe, jamais versionné</td>
+    </tr>
+    <tr>
+      <td><code>TODO</code></td>
+      <td>Autres variables ajoutées à la configuration</td>
+    </tr>
+  </tbody>
+</table>
 
-## 7. Exécution
+<hr>
 
-### Pipeline Python
+<h2 id="execution">7. Exécution</h2>
 
-```bash
-python -m src.main
-echo $?          # 0 = succès, non nul = échec (PowerShell : $LASTEXITCODE)
-```
+<h3>Pipeline Python</h3>
 
-Le pipeline enchaîne : extraction → transformation → contrôles qualité → chargement `raw` et `staging` → journalisation.
-Les logs sont écrits dans `logs/` (TODO: nom du fichier). Chaque exécution est tracée dans `ops.pipeline_run_log`.
+<pre><code class="language-bash">python -m src.main
 
-TODO: documenter les options de ligne de commande si vous en avez ajouté.
+# Linux / macOS
+echo $?
 
-### dbt
+# Windows PowerShell
+$LASTEXITCODE
+</code></pre>
 
-dbt s'installe dans un **environnement virtuel séparé** (voir [décisions](#12-décisions-techniques-et-compromis)).
+<p>
+  Le pipeline enchaîne les opérations suivantes :
+  extraction → transformation → contrôles qualité → chargement
+  <code>raw</code> et <code>staging</code> → journalisation.
+</p>
 
-```bash
+<ul>
+  <li>Les logs sont écrits dans <code>logs/</code> — <code>TODO: nom du fichier</code>.</li>
+  <li>Chaque exécution est tracée dans <code>ops.pipeline_run_log</code>.</li>
+  <li><code>TODO:</code> documenter les options de ligne de commande si elles existent.</li>
+</ul>
+
+<h3>dbt</h3>
+
+<p>
+  dbt est installé dans un <strong>environnement virtuel séparé</strong>
+  afin d’éviter les conflits de dépendances avec le pipeline Python.
+</p>
+
+<pre><code class="language-bash">cd dbt_project
+
+dbt debug
+dbt run
+dbt test
+dbt docs generate
+dbt docs serve
+</code></pre>
+
+<ul>
+  <li><code>dbt debug</code> : vérifie la configuration et la connexion.</li>
+  <li><code>dbt run</code> : construit les modèles staging, intermediate et marts.</li>
+  <li><code>dbt test</code> : exécute les tests de qualité.</li>
+  <li><code>dbt docs generate</code> : génère la documentation dbt.</li>
+  <li><code>dbt docs serve</code> : ouvre la documentation et le graphe de dépendances.</li>
+</ul>
+
+<p>
+  Le fichier <code>profiles.yml</code> est hors dépôt :
+  <code>~/.dbt/profiles.yml</code>. Il doit récupérer les secrets via
+  <code>env_var</code>.
+</p>
+
+<p>
+  <code>TODO:</code> ajouter un exemple de <code>profiles.yml</code> avec des valeurs factices.
+</p>
+
+<h3>Idempotence</h3>
+
+<p>
+  Relancer le pipeline doit donner le même résultat.
+  <code>TODO:</code> décrire la stratégie réellement retenue :
+  <code>truncate + reload</code>, <code>upsert</code> ou une autre méthode,
+  ainsi que les vérifications réalisées.
+</p>
+
+<hr>
+
+<h2 id="modele-de-donnees">8. Modèle de données</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Schéma</th>
+      <th>Table</th>
+      <th>Rôle</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>raw</code></td>
+      <td><code>weather_hourly_raw</code></td>
+      <td>Données météorologiques horaires telles que reçues</td>
+    </tr>
+    <tr>
+      <td><code>raw</code></td>
+      <td><code>air_quality_hourly_raw</code></td>
+      <td>Données de qualité de l’air horaires telles que reçues</td>
+    </tr>
+    <tr>
+      <td><code>raw</code></td>
+      <td><code>communes_ref_raw</code></td>
+      <td>Référentiel des communes</td>
+    </tr>
+    <tr>
+      <td><code>raw</code></td>
+      <td><code>population_ref_raw</code></td>
+      <td>Populations légales</td>
+    </tr>
+    <tr>
+      <td><code>staging</code></td>
+      <td><code>city</code></td>
+      <td>Dimension ville</td>
+    </tr>
+    <tr>
+      <td><code>staging</code></td>
+      <td><code>weather_observation</code></td>
+      <td>Météo nettoyée et standardisée</td>
+    </tr>
+    <tr>
+      <td><code>staging</code></td>
+      <td><code>air_quality_observation</code></td>
+      <td>Qualité de l’air nettoyée et standardisée</td>
+    </tr>
+    <tr>
+      <td><code>staging</code></td>
+      <td><code>rejected_rows</code></td>
+      <td>Lignes rejetées avec le motif du rejet</td>
+    </tr>
+    <tr>
+      <td><code>ops</code></td>
+      <td><code>pipeline_run_log</code></td>
+      <td>Journal des exécutions du pipeline</td>
+    </tr>
+    <tr>
+      <td><code>analytics</code></td>
+      <td><code>TODO: vos marts dbt</code></td>
+      <td>Tables analytiques finales</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  Les noms ci-dessus sont indicatifs : alignez-les avec vos scripts DDL réels.
+</p>
+
+<h3>Grain et clés</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Table</th>
+      <th>Grain</th>
+      <th>Clé primaire</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>staging.weather_observation</code></td>
+      <td>Une ville, une heure</td>
+      <td><code>TODO</code></td>
+    </tr>
+    <tr>
+      <td><code>staging.air_quality_observation</code></td>
+      <td>Une ville, une heure</td>
+      <td><code>TODO</code></td>
+    </tr>
+    <tr>
+      <td><code>staging.city</code></td>
+      <td>Une ville</td>
+      <td><code>TODO</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  Dictionnaire complet :
+  <a href="docs/data_dictionary.md"><code>docs/data_dictionary.md</code></a>.
+</p>
+
+<hr>
+
+<h2 id="qualite-de-donnees">9. Qualité de données</h2>
+
+<h3>Règles appliquées</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Table</th>
+      <th>Dimension</th>
+      <th>Règle</th>
+      <th>Action en cas d’échec</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>DQ-01</td>
+      <td><code>TODO</code></td>
+      <td>Complétude</td>
+      <td><code>TODO: ex. timestamp non nul</code></td>
+      <td>Rejeter la ligne</td>
+    </tr>
+    <tr>
+      <td>DQ-02</td>
+      <td><code>TODO</code></td>
+      <td>Validité</td>
+      <td><code>TODO: ex. PM2.5 ≥ 0</code></td>
+      <td>Rejeter la ligne</td>
+    </tr>
+    <tr>
+      <td>DQ-03</td>
+      <td><code>TODO</code></td>
+      <td>Unicité</td>
+      <td><code>TODO: absence de doublon sur la clé</code></td>
+      <td><code>TODO</code></td>
+    </tr>
+    <tr>
+      <td>DQ-04</td>
+      <td><code>TODO</code></td>
+      <td>Cohérence</td>
+      <td><code>TODO: ville présente dans la dimension</code></td>
+      <td><code>TODO</code></td>
+    </tr>
+    <tr>
+      <td>DQ-05</td>
+      <td><code>TODO</code></td>
+      <td>Validité</td>
+      <td><code>TODO: plage de température plausible</code></td>
+      <td><code>TODO</code></td>
+    </tr>
+    <tr>
+      <td>DQ-06</td>
+      <td><code>TODO</code></td>
+      <td>Volumétrie</td>
+      <td><code>TODO: 24 × nombre de jours par ville</code></td>
+      <td><code>TODO</code></td>
+    </tr>
+    <tr>
+      <td>DQ-07</td>
+      <td><code>TODO</code></td>
+      <td><code>TODO</code></td>
+      <td><code>TODO</code></td>
+      <td><code>TODO</code></td>
+    </tr>
+    <tr>
+      <td>DQ-08</td>
+      <td><code>TODO</code></td>
+      <td><code>TODO</code></td>
+      <td><code>TODO</code></td>
+      <td><code>TODO</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Gestion des rejets</h3>
+
+<p>
+  Les lignes invalides sont enregistrées dans <code>staging.rejected_rows</code>
+  avec le code de règle, la ligne d’origine et l’identifiant d’exécution.
+</p>
+
+<p>
+  Le pipeline échoue si le taux de rejet dépasse
+  <strong><code>TODO: seuil</code></strong>.
+</p>
+
+<h3>Tests dbt</h3>
+
+<p>
+  <code>TODO:</code> lister les tests mis en œuvre :
+  <code>not_null</code>, <code>unique</code>, <code>relationships</code>,
+  <code>accepted_values</code> et les tests singuliers.
+</p>
+
+<hr>
+
+<h2 id="tests">10. Tests</h2>
+
+<pre><code class="language-bash">pytest -v
+
 cd dbt_project
 dbt debug                # vérifie la configuration et la connexion
 dbt run                  # construit staging, intermediate et marts
