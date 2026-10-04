@@ -1,132 +1,226 @@
-# Air & Weather Pipeline
+<h1>🌤️ Air &amp; Weather Pipeline</h1>
 
-Pipeline de données local croisant **météo** et **qualité de l'air** pour 8 villes françaises sur 12 mois, au grain horaire. Il extrait des données d'API REST et de fichiers CSV/Excel, les nettoie avec Python/Pandas, les charge dans PostgreSQL (`raw` → `staging`), puis construit des tables analytiques avec dbt.
+<p>
+  Pipeline de données local croisant les données de <strong>météo</strong> et de
+  <strong>qualité de l’air</strong> pour huit villes françaises sur douze mois,
+  au grain horaire.
+</p>
 
-> **Statut** : `TODO: en cours / v1.0.0`
-> Les passages marqués `TODO` sont à compléter avec vos résultats réels. Ne laissez aucun `TODO` avant la publication.
+<p>
+  Le projet extrait des données depuis des API REST ainsi que des fichiers CSV/Excel,
+  les nettoie avec Python et Pandas, les charge dans PostgreSQL
+  (<code>raw</code> → <code>staging</code>), puis construit des tables analytiques avec dbt.
+</p>
 
----
+<p>
+  <strong>Statut :</strong> <code>TODO: en cours / v1.0.0</code><br>
+  Les passages marqués <code>TODO</code> sont à compléter avec vos résultats réels.
+  Ne laissez aucun <code>TODO</code> avant publication.
+</p>
 
-## Sommaire
+<hr>
 
-1. [Contexte et objectifs](#1-contexte-et-objectifs)
-2. [Architecture](#2-architecture)
-3. [Stack technique](#3-stack-technique)
-4. [Structure du dépôt](#4-structure-du-dépôt)
-5. [Sources de données](#5-sources-de-données)
-6. [Installation](#6-installation)
-7. [Exécution](#7-exécution)
-8. [Modèle de données](#8-modèle-de-données)
-9. [Qualité de données](#9-qualité-de-données)
-10. [Tests](#10-tests)
-11. [Dépannage](#11-dépannage)
-12. [Décisions techniques et compromis](#12-décisions-techniques-et-compromis)
-13. [Hypothèses et limites](#13-hypothèses-et-limites)
-14. [Résultats](#14-résultats)
-15. [Évolutions possibles](#15-évolutions-possibles)
+<h2>Sommaire</h2>
 
----
+<ol>
+  <li><a href="#contexte-et-objectifs">Contexte et objectifs</a></li>
+  <li><a href="#architecture">Architecture</a></li>
+  <li><a href="#stack-technique">Stack technique</a></li>
+  <li><a href="#structure-du-depot">Structure du dépôt</a></li>
+  <li><a href="#sources-de-donnees">Sources de données</a></li>
+  <li><a href="#installation">Installation</a></li>
+  <li><a href="#execution">Exécution</a></li>
+  <li><a href="#modele-de-donnees">Modèle de données</a></li>
+  <li><a href="#qualite-de-donnees">Qualité de données</a></li>
+  <li><a href="#tests">Tests</a></li>
+  <li><a href="#depannage">Dépannage</a></li>
+  <li><a href="#decisions-techniques-et-compromis">Décisions techniques et compromis</a></li>
+  <li><a href="#hypotheses-et-limites">Hypothèses et limites</a></li>
+  <li><a href="#resultats">Résultats</a></li>
+  <li><a href="#evolutions-possibles">Évolutions possibles</a></li>
+</ol>
 
-## 1. Contexte et objectifs
+<hr>
 
-**Besoin métier (TODO: reprendre votre exercice 1 de la Phase 0, 5 à 8 lignes).**
-Exemple de forme : une agence régionale souhaite suivre la météo et la pollution (PM2.5, PM10, NO2, ozone) pour repérer les épisodes de pollution et leurs liens avec les conditions météorologiques.
+<h2 id="contexte-et-objectifs">1. Contexte et objectifs</h2>
 
-**Questions analytiques :**
+<h3>Besoin métier</h3>
 
-- TODO: question 1 (ex. : quels jours la concentration de PM2.5 dépasse-t-elle un seuil, et quelle était la météo ?)
-- TODO: question 2
-- TODO: question 3
+<p>
+  <strong>TODO :</strong> reprendre votre exercice 1 de la Phase 0, en 5 à 8 lignes.
+</p>
 
-**Périmètre :**
+<p>
+  Exemple : une agence régionale souhaite suivre les conditions météorologiques et
+  les niveaux de pollution atmosphérique (PM2.5, PM10, NO2 et ozone), afin
+  d’identifier les épisodes de pollution et leurs liens avec la météo.
+</p>
 
-| Élément | Valeur |
-|---|---|
-| Villes | 8 villes françaises (TODO: liste) |
-| Période | TODO: ex. 2025-01-01 → 2025-12-31 |
-| Grain brut | une ville, une heure |
-| Fuseau de référence | TODO: ex. UTC en base, heure locale à l'analyse |
+<h3>Questions analytiques</h3>
 
----
+<ul>
+  <li><strong>TODO :</strong> Quels jours la concentration de PM2.5 dépasse-t-elle un seuil, et quelles étaient les conditions météorologiques associées ?</li>
+  <li><strong>TODO :</strong> Question analytique n°2.</li>
+  <li><strong>TODO :</strong> Question analytique n°3.</li>
+</ul>
 
-## 2. Architecture
+<h3>Périmètre</h3>
 
-```
-SOURCES                    EXTRACTION            STOCKAGE BRUT            TRANSFORMATION (Python)
-API météo (JSON)    ───►   src/extract/   ───►   data/raw/ (échantillons) ──►  src/transform/
+<table>
+  <thead>
+    <tr>
+      <th>Élément</th>
+      <th>Valeur</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Villes</td>
+      <td>8 villes françaises (<code>TODO: liste</code>)</td>
+    </tr>
+    <tr>
+      <td>Période</td>
+      <td><code>TODO: ex. 2025-01-01 → 2025-12-31</code></td>
+    </tr>
+    <tr>
+      <td>Grain brut</td>
+      <td>Une ville, une heure</td>
+    </tr>
+    <tr>
+      <td>Fuseau de référence</td>
+      <td><code>TODO: ex. UTC en base, heure locale à l’analyse</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2 id="architecture">2. Architecture</h2>
+
+<pre><code>SOURCES                    EXTRACTION            STOCKAGE BRUT            TRANSFORMATION (Python)
+
+API météo (JSON)    ───►   src/extract/   ───►   data/raw/                ──►  src/transform/
 API air (JSON)      ───►   src/extract/                                        src/quality/
-CSV communes        ───►   src/extract/   ───►   data/external/                (nettoyage, validation,
-Excel populations   ───►   src/extract/                                          jointures, rejets)
+CSV communes        ───►   src/extract/   ───►   data/external/                nettoyage, validation,
+Excel populations   ───►   src/extract/                                          jointures, rejets
                                                           │
                                                           ▼
                                                  CHARGEMENT (src/load/)
                                                           │
                                                           ▼
- PostgreSQL :  raw  ───►  staging  ───►  (dbt) staging / intermediate  ───►  analytics (marts)
-                              │
-                              └── staging.rejected_rows (lignes rejetées + motif)
-               ops.pipeline_run_log (journal des exécutions)
+PostgreSQL : raw ───► staging ───► dbt staging / intermediate ───► analytics (marts)
+                             │
+                             └── staging.rejected_rows
+                                 lignes rejetées + motif
 
-ORCHESTRATION : python -m src.main   │   LOGS : logs/   │   TESTS : pytest + dbt test
-```
+ops.pipeline_run_log : journal des exécutions
 
-**Flux en deux temps :**
+ORCHESTRATION : python -m src.main
+LOGS          : logs/
+TESTS         : pytest + dbt test
+</code></pre>
 
-1. **ETL Python** (extraction, nettoyage, validation, chargement) alimente `raw` et `staging`.
-2. **ELT dbt** reprend les tables `raw` comme sources et reconstruit la chaîne en SQL jusqu'aux marts.
+<h3>Flux en deux temps</h3>
 
-Détails dans [`docs/architecture.md`](docs/architecture.md).
+<ol>
+  <li>
+    <strong>ETL Python :</strong> extraction, nettoyage, validation et chargement
+    vers les schémas <code>raw</code> et <code>staging</code>.
+  </li>
+  <li>
+    <strong>ELT dbt :</strong> réutilisation des tables brutes ou de staging
+    comme sources, puis transformations SQL jusqu’aux tables analytiques finales.
+  </li>
+</ol>
 
----
+<p>
+  Voir également :
+  <a href="docs/architecture.md"><code>docs/architecture.md</code></a>.
+</p>
 
-## 3. Stack technique
+<hr>
 
-| Domaine | Outil |
-|---|---|
-| Langage | Python 3.TODO |
-| Appels HTTP | `requests` |
-| Manipulation de données | `pandas`, `openpyxl` |
-| Accès base de données | `SQLAlchemy`, `psycopg` |
-| Base de données | PostgreSQL TODO (version) |
-| Transformation SQL | dbt Core + `dbt-postgres` |
-| Configuration | `python-dotenv` |
-| Tests | `pytest` |
-| Versionnage | Git, GitHub |
+<h2 id="stack-technique">3. Stack technique</h2>
 
----
+<table>
+  <thead>
+    <tr>
+      <th>Domaine</th>
+      <th>Outil</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Langage</td>
+      <td>Python 3.<code>TODO</code></td>
+    </tr>
+    <tr>
+      <td>Appels HTTP</td>
+      <td><code>requests</code></td>
+    </tr>
+    <tr>
+      <td>Manipulation de données</td>
+      <td><code>pandas</code>, <code>openpyxl</code></td>
+    </tr>
+    <tr>
+      <td>Accès base de données</td>
+      <td><code>SQLAlchemy</code>, <code>psycopg</code></td>
+    </tr>
+    <tr>
+      <td>Base de données</td>
+      <td>PostgreSQL <code>TODO: version</code></td>
+    </tr>
+    <tr>
+      <td>Transformation SQL</td>
+      <td>dbt Core + <code>dbt-postgres</code></td>
+    </tr>
+    <tr>
+      <td>Configuration</td>
+      <td><code>python-dotenv</code></td>
+    </tr>
+    <tr>
+      <td>Tests</td>
+      <td><code>pytest</code></td>
+    </tr>
+    <tr>
+      <td>Versionnage</td>
+      <td>Git, GitHub</td>
+    </tr>
+  </tbody>
+</table>
 
-## 4. Structure du dépôt
+<hr>
 
-```
-air-weather-pipeline/
+<h2 id="structure-du-depot">4. Structure du dépôt</h2>
+
+<pre><code>air-weather-pipeline/
 ├── README.md
 ├── .gitignore
-├── .env.example            # modèle de configuration (valeurs factices)
-├── requirements.txt        # dépendances d'exécution
-├── requirements-dev.txt    # dépendances de développement (tests)
+├── .env.example            # Modèle de configuration avec valeurs factices
+├── requirements.txt        # Dépendances d’exécution
+├── requirements-dev.txt    # Dépendances de développement et de tests
 ├── pyproject.toml
 ├── data/
-│   ├── raw/                # échantillons bruts d'API (non versionnés)
-│   ├── external/           # CSV / Excel téléchargés (non versionnés)
+│   ├── raw/                # Échantillons bruts d’API, non versionnés
+│   ├── external/           # CSV / Excel téléchargés, non versionnés
 │   └── processed/
-├── logs/                   # journaux d'exécution (non versionnés)
+├── logs/                   # Journaux d’exécution, non versionnés
 ├── sql/
-│   ├── ddl/                # création schémas et tables
-│   └── queries/            # contrôles et requêtes d'analyse
+│   ├── ddl/                # Création des schémas et tables
+│   └── queries/            # Contrôles et requêtes d’analyse
 ├── src/
 │   ├── config.py
-│   ├── main.py             # point d'entrée du pipeline
+│   ├── main.py             # Point d’entrée du pipeline
 │   ├── extract/            # API, CSV, Excel
-│   ├── transform/          # nettoyage et mise en forme
-│   ├── load/               # chargement PostgreSQL et journal
-│   ├── quality/            # règles de qualité et profilage
-│   └── utils/              # base de données, logging
+│   ├── transform/          # Nettoyage et mise en forme
+│   ├── load/               # Chargement PostgreSQL et journalisation
+│   ├── quality/            # Règles de qualité et profilage
+│   └── utils/              # Base de données, logging
 ├── tests/
-├── docs/                   # architecture, dictionnaire, décisions
-└── dbt_project/            # modèles dbt (staging, intermediate, marts)
-```
+├── docs/                   # Architecture, dictionnaire, décisions
+└── dbt_project/            # Modèles dbt : staging, intermediate, marts
+</code></pre>
 
----
 
 ## 5. Sources de données
 
@@ -401,5 +495,6 @@ Chaque décision suit la forme : *choix, alternative écartée, raison, compromi
 ## Licence et crédits
 
 TODO: licence du code. Les données restent soumises aux licences de leurs sources respectives (voir [Sources de données](#5-sources-de-données)).
-#   A i r - W e a t h e r - P i p e l i n e  
+#   A i r - W e a t h e r - P i p e l i n e 
+ 
  
