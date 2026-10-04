@@ -135,7 +135,7 @@ TESTS         : pytest + dbt test
 
 <p>
   Voir également :
-  <a href="docs/architecture.md"><code>docs/architecture.md</code></a>.
+  <a href="docs/README.md"><code>docs/architecture.md</code></a>.
 </p>
 
 <hr>
